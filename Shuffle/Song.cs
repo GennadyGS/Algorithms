@@ -2,7 +2,7 @@
 
 namespace Shuffle
 {
-    class Song
+    public class Song
     {
         public String Name { get; set; }
 
