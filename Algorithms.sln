@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shuffle", "Shuffle\Shuffle.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelectKMax", "SelectKMax\SelectKMax.csproj", "{B0C9A134-C4D4-4B01-B419-09552C3DD3EA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fibonacci", "Fibonacci\Fibonacci.csproj", "{F78D8D98-80F6-4744-87EB-EE12C1B6B687}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{B0C9A134-C4D4-4B01-B419-09552C3DD3EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0C9A134-C4D4-4B01-B419-09552C3DD3EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0C9A134-C4D4-4B01-B419-09552C3DD3EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F78D8D98-80F6-4744-87EB-EE12C1B6B687}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F78D8D98-80F6-4744-87EB-EE12C1B6B687}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F78D8D98-80F6-4744-87EB-EE12C1B6B687}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F78D8D98-80F6-4744-87EB-EE12C1B6B687}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
