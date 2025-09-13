@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SkyLine.Tests/SkyLine.Tests.csproj" />
+  <Project Path="SkyLine/SkyLine.csproj" />
+</Solution>
