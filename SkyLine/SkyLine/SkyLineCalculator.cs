@@ -31,7 +31,7 @@ public static class SkyLineCalculator
             .GroupByAdjacent(border => border.Position);
         var currentHouses = new PriorityQueue<HouseInfo, Height>(new ReverseComparer<Height>());
         var result = new List<SkyLinePoint>();
-        Height? lastHeight = null;
+        var lastHeight = new Height(0);
         foreach (var borderGroup in borderGroups)
         {
             var currentPosition = borderGroup.Key;

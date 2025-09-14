@@ -62,6 +62,53 @@ public sealed class SkyLineCalculatorTests
                     new(6, 0),
                 },
             ],
+            [
+                new HouseInfo[]
+                {
+                    new(3, 3, 5),
+                    new(4, 4, 10),
+                },
+                Array.Empty<SkyLinePoint>(),
+            ],
+            [
+                new HouseInfo[]
+                {
+                    new(3, 6, 5),
+                    new(4, 5, 10),
+                },
+                new SkyLinePoint[]
+                {
+                    new(3, 5),
+                    new(4, 10),
+                    new(5, 5),
+                    new(6, 0),
+                },
+            ],
+            [
+                new HouseInfo[]
+                {
+                    new(3, 6, 10),
+                    new(4, 5, 5),
+                },
+                new SkyLinePoint[]
+                {
+                    new(3, 10),
+                    new(6, 0),
+                },
+            ],
+            [
+                new HouseInfo[]
+                {
+                    new(3, 5, 5),
+                    new(3, 4, 10),
+                },
+                new SkyLinePoint[]
+                {
+                    new(3, 10),
+                    new(4, 5),
+                    new(5, 0),
+                },
+            ],
         };
 
     [Theory]
