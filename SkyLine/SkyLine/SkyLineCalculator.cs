@@ -2,9 +2,39 @@
 
 namespace SkyLine;
 
-public sealed record HouseInfo(int Left, int Right, int Height);
+public sealed record HouseInfo(Position Left, Position Right, Height Height);
 
-public sealed record SkyLinePoint(int X, int Height);
+public sealed record SkyLinePoint(Position Position, Height Height);
+
+public sealed record Position(int Value) : IComparable<Position>
+{
+    public static implicit operator Position(int value) => new(value);
+
+    public int CompareTo(Position? other)
+    {
+        if (ReferenceEquals(this, other))
+        {
+            return 0;
+        }
+
+        return other is null ? 1 : Value.CompareTo(other.Value);
+    }
+}
+
+public sealed record Height(int Value) : IComparable<Height>
+{
+    public static implicit operator Height(int value) => new(value);
+
+    public int CompareTo(Height? other)
+    {
+        if (ReferenceEquals(this, other))
+        {
+            return 0;
+        }
+
+        return other is null ? 1 : Value.CompareTo(other.Value);
+    }
+}
 
 public static class SkyLineCalculator
 {
@@ -13,23 +43,24 @@ public static class SkyLineCalculator
     {
         var borderGroups = houses
             .SelectMany(GetHouseBorders)
-            .OrderBy(border => border.X)
-            .GroupByAdjacent(border => border.X);
-        var activeHeights = new PriorityQueue<int, int>(new ReverseComparer<int>());
+            .OrderBy(border => border.Position)
+            .GroupByAdjacent(border => border.Position);
+        var currentHeightsByRight =
+            new PriorityQueue<Position, Height>(new ReverseComparer<Height>());
         var result = new List<SkyLinePoint>();
-        int? lastHeight = null;
+        Height? lastHeight = null;
         foreach (var borderGroup in borderGroups)
         {
-            activeHeights.EnqueueRange(
+            var currentPosition = borderGroup.Key;
+            currentHeightsByRight.EnqueueRange(
                 borderGroup
                     .Where(border => border.BorderType == BorderType.Left)
                     .Select(border => (border.House.Right, border.House.Height)));
-            var currentX = borderGroup.Key;
-            activeHeights.DequeueWhile((right, _) => right <= currentX);
-            var currentHeight = activeHeights.TryPeek(out _, out var height) ? height : 0;
+            currentHeightsByRight.DequeueWhile((right, _) => right.Value <= currentPosition.Value);
+            var currentHeight = currentHeightsByRight.TryPeek(out _, out var height) ? height : 0;
             if (lastHeight != currentHeight)
             {
-                result.Add(new SkyLinePoint(currentX, currentHeight));
+                result.Add(new SkyLinePoint(currentPosition, currentHeight));
                 lastHeight = currentHeight;
             }
         }
@@ -48,7 +79,7 @@ public static class SkyLineCalculator
         Right,
     }
 
-    private sealed record HouseBorder(BorderType BorderType, int X, HouseInfo House);
+    private sealed record HouseBorder(BorderType BorderType, Position Position, HouseInfo House);
 
     private sealed class ReverseComparer<T> : IComparer<T> where T : IComparable<T>
     {
@@ -74,41 +105,35 @@ internal static class EnumerableExtensions
         this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
     {
         var isFirst = true;
-        var currentKey = default(TKey);
-        var currentValues = new List<TSource>();
+        var lastKey = default(TKey);
+        var lastValues = new List<TSource>();
         foreach (var item in source)
         {
             var key = keySelector(item);
-            if (EqualityComparer<TKey>.Default.Equals(currentKey, key) || isFirst)
+            if (EqualityComparer<TKey>.Default.Equals(lastKey, key) || isFirst)
             {
                 isFirst = false;
             }
             else
             {
-                yield return new Grouping<TKey, TSource>(currentKey!, currentValues);
-                currentValues = new List<TSource>();
+                yield return new Grouping<TKey, TSource>(lastKey!, lastValues);
+                lastValues = new List<TSource>();
             }
-            currentKey = key;
-            currentValues.Add(item);
+            lastKey = key;
+            lastValues.Add(item);
         }
 
-        if (currentValues.Count > 0)
+        if (lastValues.Count > 0)
         {
-            yield return new Grouping<TKey, TSource>(currentKey!, currentValues);
+            yield return new Grouping<TKey, TSource>(lastKey!, lastValues);
         }
     }
 
     private sealed record Grouping<TKey, TSource>(TKey Key, IEnumerable<TSource> Values)
         : IGrouping<TKey, TSource>
     {
-        public IEnumerator<TSource> GetEnumerator()
-        {
-            return Values.GetEnumerator();
-        }
+        public IEnumerator<TSource> GetEnumerator() => Values.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
