@@ -6,34 +6,18 @@ public sealed record HouseInfo(Position Left, Position Right, Height Height);
 
 public sealed record SkyLinePoint(Position Position, Height Height);
 
-public sealed record Position(int Value) : IComparable<Position>
+public readonly record struct Position(int Value) : IComparable<Position>
 {
     public static implicit operator Position(int value) => new(value);
 
-    public int CompareTo(Position? other)
-    {
-        if (ReferenceEquals(this, other))
-        {
-            return 0;
-        }
-
-        return other is null ? 1 : Value.CompareTo(other.Value);
-    }
+    public int CompareTo(Position other) => Value.CompareTo(other.Value);
 }
 
-public sealed record Height(int Value) : IComparable<Height>
+public readonly record struct Height(int Value) : IComparable<Height>
 {
     public static implicit operator Height(int value) => new(value);
 
-    public int CompareTo(Height? other)
-    {
-        if (ReferenceEquals(this, other))
-        {
-            return 0;
-        }
-
-        return other is null ? 1 : Value.CompareTo(other.Value);
-    }
+    public int CompareTo(Height other) => Value.CompareTo(other.Value);
 }
 
 public static class SkyLineCalculator
