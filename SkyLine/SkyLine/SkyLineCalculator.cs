@@ -29,19 +29,18 @@ public static class SkyLineCalculator
             .SelectMany(GetHouseBorders)
             .OrderBy(border => border.Position)
             .GroupByAdjacent(border => border.Position);
-        var currentHeightsByRight =
-            new PriorityQueue<Position, Height>(new ReverseComparer<Height>());
+        var currentHouses = new PriorityQueue<HouseInfo, Height>(new ReverseComparer<Height>());
         var result = new List<SkyLinePoint>();
         Height? lastHeight = null;
         foreach (var borderGroup in borderGroups)
         {
             var currentPosition = borderGroup.Key;
-            currentHeightsByRight.EnqueueRange(
+            currentHouses.EnqueueRange(
                 borderGroup
                     .Where(border => border.BorderType == BorderType.Left)
-                    .Select(border => (border.House.Right, border.House.Height)));
-            currentHeightsByRight.DequeueWhile((right, _) => right.Value <= currentPosition.Value);
-            var currentHeight = currentHeightsByRight.TryPeek(out _, out var height) ? height : 0;
+                    .Select(border => (border.House, border.House.Height)));
+            currentHouses.DequeueWhile((house, _) => house.Right.Value <= currentPosition.Value);
+            var currentHeight = currentHouses.TryPeek(out _, out var height) ? height : 0;
             if (lastHeight != currentHeight)
             {
                 result.Add(new SkyLinePoint(currentPosition, currentHeight));
