@@ -1,4 +1,6 @@
-﻿namespace SkyLine;
+﻿using System.Collections;
+
+namespace SkyLine;
 
 public sealed record HouseInfo(int Left, int Right, int Height);
 
@@ -12,27 +14,18 @@ public static class SkyLineCalculator
         var borderGroups = houses
             .SelectMany(GetHouseBorders)
             .OrderBy(border => border.X)
-            .GroupBy(border => border.X)
-            .ToList();
+            .GroupByAdjacent(border => border.X);
         var activeHeights = new PriorityQueue<int, int>(new ReverseComparer<int>());
         var result = new List<SkyLinePoint>();
         int? lastHeight = null;
         foreach (var borderGroup in borderGroups)
         {
+            activeHeights.EnqueueRange(
+                borderGroup
+                    .Where(border => border.BorderType == BorderType.Left)
+                    .Select(border => (border.House.Right, border.House.Height)));
             var currentX = borderGroup.Key;
-            foreach (var border in borderGroup)
-            {
-                if (border.BorderType == BorderType.Left)
-                {
-                    activeHeights.Enqueue(border.House.Right, border.House.Height);
-                }
-            }
-
-            while (activeHeights.TryPeek(out var right, out _) && right <= currentX)
-            {
-                activeHeights.Dequeue();
-            };
-
+            activeHeights.DequeueWhile((right, _) => right <= currentX);
             var currentHeight = activeHeights.TryPeek(out _, out var height) ? height : 0;
             if (lastHeight != currentHeight)
             {
@@ -41,7 +34,6 @@ public static class SkyLineCalculator
             }
         }
         return result;
-
     }
 
     private static IReadOnlyCollection<HouseBorder> GetHouseBorders(HouseInfo house) =>
@@ -64,3 +56,59 @@ public static class SkyLineCalculator
     }
 }
 
+internal static class PriorityQueueExtensions
+{
+    public static void DequeueWhile<TElement, TPriority>(
+        this PriorityQueue<TElement, TPriority> source, Func<TElement, TPriority, bool> predicate)
+    {
+        while (source.TryPeek(out var element, out var priority) && predicate(element, priority))
+        {
+            source.Dequeue();
+        }
+    }
+}
+
+internal static class EnumerableExtensions
+{
+    public static IEnumerable<IGrouping<TKey, TSource>> GroupByAdjacent<TSource, TKey>(
+        this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+    {
+        var isFirst = true;
+        var currentKey = default(TKey);
+        var currentValues = new List<TSource>();
+        foreach (var item in source)
+        {
+            var key = keySelector(item);
+            if (EqualityComparer<TKey>.Default.Equals(currentKey, key) || isFirst)
+            {
+                isFirst = false;
+            }
+            else
+            {
+                yield return new Grouping<TKey, TSource>(currentKey!, currentValues);
+                currentValues = new List<TSource>();
+            }
+            currentKey = key;
+            currentValues.Add(item);
+        }
+
+        if (currentValues.Count > 0)
+        {
+            yield return new Grouping<TKey, TSource>(currentKey!, currentValues);
+        }
+    }
+
+    private sealed record Grouping<TKey, TSource>(TKey Key, IEnumerable<TSource> Values)
+        : IGrouping<TKey, TSource>
+    {
+        public IEnumerator<TSource> GetEnumerator()
+        {
+            return Values.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+    }
+}
